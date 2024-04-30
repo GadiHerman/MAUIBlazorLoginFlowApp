@@ -1,0 +1,90 @@
+﻿@page "/showAll"
+@using System.Text.Json
+@inject HttpClient httpClient
+@inject NavigationManager navigateMgr
+
+<h1>Show All Customers</h1>
+
+<hr />
+
+@* <h1> Id: @UID</h1> *@
+
+@if (customer != null)
+{
+    <h1> Id: @customer.Id</h1>
+    <h1> Name: @customer.Name</h1>
+    <h1> Age: @customer.Age</h1>
+}
+
+
+<hr />
+
+@if (CustomerList == null)
+{
+    <p><em>@ResultStr</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in CustomerList)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Age</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    string ResultStr = " Loading... ";
+    public Customer customer { get; set; }
+    private List<Customer> CustomerList;
+    // public string UID { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        // UID = await SecureStorage.Default.GetAsync("ID");
+        // if (UID == null)
+        // {
+        //     UID = "-1";
+        // }
+
+        string jsonString = await SecureStorage.Default.GetAsync("customerDATA");
+        if (jsonString == null)
+        {
+            customer = new Customer();
+        }
+        else
+        {
+            customer = JsonSerializer.Deserialize<Customer>(jsonString);
+        }
+
+        if (customer.Id <= 0)
+        {
+            navigateMgr.NavigateTo("/login", replace: true);
+        }
+        else
+        {
+            try
+            {
+                CustomerList = await httpClient.GetFromJsonAsync<List<Customer>>(Data.APIs.GetAllCustomerURL);
+            }
+            catch (Exception ex)
+            {
+                ResultStr = ex.Message;
+            }
+        }
+    }
+}

@@ -1,0 +1,85 @@
+﻿@page "/login"
+@using System.Text.Json;
+@inject HttpClient httpClient
+@inject NavigationManager navigateMgr
+
+<h1>Login</h1>
+
+<div class="card">
+    <div class="card-header">Login Account</div>
+    <div class="card-body">
+        <div class="form-group mt-2">
+            <label>Name</label>
+            <input type="text" class="form-control" @bind="name" />
+        </div>
+        <div class="form-group mt-2">
+            <label>Password</label>
+            <input type="password" class="form-control" @bind="paswword" />
+        </div>
+    </div>
+    <div class="card-footer">
+        <button class="btn btn-primary" @onclick="HandleLogin">Login</button>
+    </div>
+    <div class="card-header"><p><em>@ResultStr</em></p></div>
+
+</div>
+
+@code {
+
+    public string name { get; set; }
+    public string paswword { get; set; }
+    public Customer customer { get; set; }
+    public string ResultStr { get; set; }
+
+    private async Task HandleLogin()
+    {
+        // Simulate asynchronous loading to demonstrate a loading indicator
+        await Task.Delay(500);
+
+        try
+        {
+            //CustomerList = new List<Customer>();
+            Customer LoginCustomer = new Customer(0, name, 0, paswword);
+            //CustomerList.Add(customer);
+
+
+            var apiResponse = await httpClient.PostAsJsonAsync<Customer>(Data.APIs.LoginURL, LoginCustomer);
+            if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                customer = await apiResponse.Content.ReadFromJsonAsync<Customer>();
+                ResultStr = "OK";
+                if (customer.Id > 0)
+                {
+                    string jsonString = JsonSerializer.Serialize(customer);
+                    await SecureStorage.Default.SetAsync("ID", customer.Id.ToString());
+                    await SecureStorage.Default.SetAsync("IsLogin", "true");
+                    await SecureStorage.Default.SetAsync("customerDATA", jsonString);
+                    navigateMgr.NavigateTo("/showAll" , replace: true );
+                }
+                else
+                {
+                    
+                    await Application.Current.MainPage.DisplayAlert("Info", ResultStr, "Ok");
+                }
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Info", ResultStr, "Ok");
+            }
+
+            // customer = await httpClient.GetFromJsonAsync<Customer>(uri);
+            // if (customer.Id > 0)
+            // {
+            //     navigateMgr.NavigateTo("/showAll", replace: true);
+            // }
+            // else
+            // {
+            //     await Application.Current.MainPage.DisplayAlert("Info", ResultStr, "Ok");
+            // }
+        }
+        catch (Exception ex)
+        {
+            ResultStr = ex.Message;
+        }
+    }
+}

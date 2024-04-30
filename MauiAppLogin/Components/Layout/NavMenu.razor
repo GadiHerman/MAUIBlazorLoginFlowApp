@@ -1,0 +1,39 @@
+﻿@inject NavigationManager navigateMgr
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Demo Application</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="showAll">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Show All
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="#" @onclick="SignOut">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Sign Out
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+
+    private void SignOut()
+    {
+        SecureStorage.RemoveAll();
+        navigateMgr.NavigateTo("/login");
+    }
+
+}

@@ -1,0 +1,47 @@
+﻿@page "/"
+@using System.Text.Json
+@inject NavigationManager navigateMgr
+
+<div class="card">
+   @*  <div class="card-header"></div> *@
+    <div class="card-body">  Loading....           </div>
+   @*  <div class="card-footer">           </div> *@
+</div>
+
+@code {
+
+    public Customer customer { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate asynchronous loading to demonstrate a loading indicator
+        await Task.Delay(500);
+        
+        string jsonString = await SecureStorage.Default.GetAsync("customerDATA");
+        if (jsonString == null)
+        {
+            customer = new Customer();
+        }
+        else
+        {
+            customer = JsonSerializer.Deserialize<Customer>(jsonString);
+        }
+        if (customer.Id <= 0)
+        {
+            navigateMgr.NavigateTo("/login", replace: true);
+        }
+        else
+        {
+            navigateMgr.NavigateTo("/showAll", replace: true);
+        }
+    }
+
+    // private async Task HandleShowAll()
+    // {
+    //     await Application.Current.MainPage.DisplayAlert("Info", "Hello", "Ok");
+    //     //customer.Name = "Gadi";
+    //     //customer.Age = 17;
+
+    //     navigateMgr.NavigateTo("/showAll" /* , forceLoad: true */, replace: true);
+    // }
+}
